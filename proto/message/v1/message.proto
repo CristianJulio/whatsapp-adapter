@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package messager.v1;
+
+service Messager {
+  rpc Send(SendRequest) returns (SendReply) {};
+}
+
+message SendRequest {
+  oneof destination {
+    string to        = 1; // Phone number
+    string recipient = 2;  // Meta user ID (BSUID)
+  }
+
+  oneof content {
+    TextContent  text  = 3;
+    ImageContent image = 4;
+  }
+}
+
+message TextContent {
+  bool   preview_url = 1;
+  string body        = 2;
+}
+
+message ImageContent {
+  string link = 1;
+}
+
+message SendReply {
+  string message_id = 1;
+}
