@@ -13,8 +13,9 @@ message SendRequest {
   }
 
   oneof content {
-    TextContent  text  = 3;
-    ImageContent image = 4;
+    TextContent        text        = 3;
+    ImageContent       image       = 4;
+    InteractiveContent interactive = 5;
   }
 }
 
@@ -25,6 +26,59 @@ message TextContent {
 
 message ImageContent {
   string link = 1;
+}
+
+message InteractiveContent {
+  InteractiveHeader header = 1;
+  InteractiveBody   body   = 2;
+  InteractiveFooter footer = 3;
+
+  oneof type {
+    ListAction               list                 = 10;
+    ButtonAction             button               = 11;
+    RequestContactInfoAction request_contact_info = 12;
+  }
+}
+
+message InteractiveHeader {
+  string text = 1;
+}
+
+message InteractiveBody {
+  string text = 1;
+}
+
+message InteractiveFooter {
+  string text = 1;
+}
+
+message ListAction {
+  string               button   = 1;
+  repeated ListSection sections = 2;
+}
+
+message ListSection {
+  string           title = 1;
+  repeated ListRow rows  = 2;
+}
+
+message ListRow {
+  string id          = 1;
+  string title       = 2;
+  string description = 3;
+}
+
+message ButtonAction {
+  repeated ReplyButton buttons = 1;
+}
+
+message ReplyButton {
+  string id    = 1;
+  string title = 2;
+}
+
+message RequestContactInfoAction {
+  string name = 1;
 }
 
 message SendReply {
