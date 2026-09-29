@@ -1,6 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
-import type { IncomingMessageDto } from "./dto/incoming-message.dto.js";
-import type { IncomingStatusDto } from "./dto/incoming-status.dto.js";
+import { WhatsappService } from "./whatsapp.service.js";
+import type {
+  MessagesValue,
+  StatusesValue,
+  WebhookValue,
+  WhatsappWebhookDto,
+} from "./dto/whatsapp-webhook.dto.js";
+import type { Request, Response } from "express";
 
 export const WhatsappControllers = {
   verify(req: Request, res: Response) {
@@ -19,30 +24,29 @@ export const WhatsappControllers = {
   inbound(req: Request, res: Response) {
     res.sendStatus(200);
 
-    const payload: IncomingMessageDto | IncomingStatusDto = req.body;
+    const payload: WhatsappWebhookDto = req.body;
 
-    const payloadType = isMessageOrStatus(payload);
-    if (payloadType === "MESSAGE") {
-      console.log(
-        "It's a message!",
-        (payload as IncomingMessageDto).entry[0]?.changes[0]?.value.messages[0]?.text,
-      );
-      return;
+    for (const entry of payload.entry ?? []) {
+      for (const change of entry.changes ?? []) {
+        const value = change.value;
+
+        if (hasMessages(value)) {
+          WhatsappService.handleIncomingMessage(value);
+          console.log("It's a message!", value.messages[0]?.text);
+        } else if (hasStatuses(value)) {
+          console.log("It's a status update!", value.statuses[0]?.status);
+        } else {
+          console.warn("Unknown webhook payload", value);
+        }
+      }
     }
-
-    console.log(
-      "It's a status update!",
-      (payload as IncomingStatusDto).entry[0]?.changes[0]?.value.statuses[0]?.status,
-    );
-    // console.dir(req.body, { depth: null, colors: true });
   },
 };
 
-function isMessageOrStatus(dto: IncomingMessageDto | IncomingStatusDto) {
-  const value = dto.entry[0]?.changes[0]?.value;
-  if (!value) throw new Error("Unknown payload");
+function hasMessages(value: WebhookValue): value is MessagesValue {
+  return Array.isArray(value.messages);
+}
 
-  if (Object.hasOwn(value, "messages")) return "MESSAGE";
-
-  return "STATUS";
+function hasStatuses(value: WebhookValue): value is StatusesValue {
+  return Array.isArray(value.statuses);
 }
