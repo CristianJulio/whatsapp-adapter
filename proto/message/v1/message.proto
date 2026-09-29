@@ -29,9 +29,9 @@ message ImageContent {
 }
 
 message InteractiveContent {
-  InteractiveHeader header = 1;
-  InteractiveBody   body   = 2;
-  InteractiveFooter footer = 3;
+  InteractiveHeader header      = 1;
+  string            body_text   = 2;
+  string            footer_text = 3;
 
   oneof type {
     ListAction               list                 = 10;
@@ -41,14 +41,6 @@ message InteractiveContent {
 }
 
 message InteractiveHeader {
-  string text = 1;
-}
-
-message InteractiveBody {
-  string text = 1;
-}
-
-message InteractiveFooter {
   string text = 1;
 }
 
@@ -77,9 +69,8 @@ message ReplyButton {
   string title = 2;
 }
 
-message RequestContactInfoAction {
-  string name = 1;
-}
+// Meta's action name is fixed, the adapter sets it
+message RequestContactInfoAction {}
 
 message SendReply {
   string message_id = 1;
